@@ -5,7 +5,13 @@ palette = "catppuccin_macchiato"
 
 # Prompt format
 format = """
- (bold blue) $directory$git_branch$git_status (bold blue)$character"""
+ $directory$git_branch$git_status$env_var $character"""
+
+
+[env_var]
+style = "pink"
+variable = "CONDA_DEFAULT_ENV"
+format = "[$env_value]($style)"
 
 # Directory
 [directory]
