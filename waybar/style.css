@@ -146,7 +146,6 @@ window#waybar.hidden {
 	transition: none;
 	color: #161320;
 	background: #abe9b3;
-	/*background: #1a1826;*/
 }
 
 #clock.2 {
@@ -158,8 +157,7 @@ window#waybar.hidden {
 	border-radius: 10px;
 	transition: none;
 	color: #161320;
-	background: #ABE9B3;
-	/*background: #1A1826;*/
+	background: #25bebb;
 }
 
 #memory {

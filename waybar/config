@@ -63,7 +63,7 @@
     },
 
     "clock#2": {
-            "format": "{:%m-%d}",
+            "format": " {:%m-%d}",
             "tooltip": false
      },
 
