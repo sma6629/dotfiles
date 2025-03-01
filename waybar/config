@@ -59,7 +59,8 @@
     },
 
     "clock#1": {
-        "format": " {:%I:%M %p}"
+        "format": " {:%I:%M %p}",
+        "tooltip": false
     },
 
     "clock#2": {
