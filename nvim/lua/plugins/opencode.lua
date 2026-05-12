@@ -25,6 +25,16 @@ return {
     },
   },
   config = function()
+    local function map_opencode_terminal(buf)
+      local opts = { buffer = buf, silent = true }
+
+      vim.keymap.set("t", "<leader>oo", function() require("opencode").toggle() end, vim.tbl_extend("force", opts, { desc = "Toggle opencode" }))
+      vim.keymap.set("t", "<C-w>h", [[<C-\><C-n><C-w>h]], vim.tbl_extend("force", opts, { desc = "Move to left window" }))
+      vim.keymap.set("t", "<C-w>j", [[<C-\><C-n><C-w>j]], vim.tbl_extend("force", opts, { desc = "Move to lower window" }))
+      vim.keymap.set("t", "<C-w>k", [[<C-\><C-n><C-w>k]], vim.tbl_extend("force", opts, { desc = "Move to upper window" }))
+      vim.keymap.set("t", "<C-w>l", [[<C-\><C-n><C-w>l]], vim.tbl_extend("force", opts, { desc = "Move to right window" }))
+    end
+
     ---@type opencode.Opts
     vim.g.opencode_opts = {
       -- Your configuration, if any; goto definition on the type or field for details
@@ -32,19 +42,24 @@ return {
 
     vim.o.autoread = true -- Required for `opts.events.reload`
 
-    -- Recommended/example keymaps
-    vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
-    vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-    vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+    -- Use terminal-safe mappings so they survive tmux and terminal key handling.
+    vim.keymap.set({ "n", "x" }, "<leader>oa", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
+    vim.keymap.set({ "n", "x" }, "<leader>ox", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
+    vim.keymap.set("n", "<leader>oo", function() require("opencode").toggle() end,                                     { desc = "Toggle opencode" })
 
     vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
     vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
 
-    vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll opencode up" })
-    vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
+    vim.keymap.set("n", "<leader>ou", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll opencode up" })
+    vim.keymap.set("n", "<leader>od", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
 
-    -- You may want these if you use the opinionated `<C-a>` and `<C-x>` keymaps above — otherwise consider `<leader>o…` (and remove terminal mode from the `toggle` keymap)
-    vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
-    vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+    vim.api.nvim_create_autocmd("TermOpen", {
+      callback = function(event)
+        local name = vim.api.nvim_buf_get_name(event.buf)
+        if name:match("opencode %-%-port") then
+          map_opencode_terminal(event.buf)
+        end
+      end,
+    })
   end,
 }
