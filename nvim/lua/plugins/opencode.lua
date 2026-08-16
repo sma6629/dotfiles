@@ -28,7 +28,7 @@ return {
     local function map_opencode_terminal(buf)
       local opts = { buffer = buf, silent = true }
 
-      vim.keymap.set("t", "<leader>oo", function() require("opencode").toggle() end, vim.tbl_extend("force", opts, { desc = "Toggle opencode" }))
+      vim.keymap.set("t", "<C-w>p", function() require("opencode").toggle() end, vim.tbl_extend("force", opts, { desc = "Toggle opencode" }))
       vim.keymap.set("t", "<C-w>h", [[<C-\><C-n><C-w>h]], vim.tbl_extend("force", opts, { desc = "Move to left window" }))
       vim.keymap.set("t", "<C-w>j", [[<C-\><C-n><C-w>j]], vim.tbl_extend("force", opts, { desc = "Move to lower window" }))
       vim.keymap.set("t", "<C-w>k", [[<C-\><C-n><C-w>k]], vim.tbl_extend("force", opts, { desc = "Move to upper window" }))
