@@ -6,7 +6,6 @@ return {
       -- `snacks.nvim` integration is recommended, but optional
       ---@module "snacks" <- Loads `snacks.nvim` types for configuration intellisense
       "folke/snacks.nvim",
-      optional = true,
       opts = {
         input = {}, -- Enhances `ask()`
         picker = { -- Enhances `select()`
@@ -25,10 +24,23 @@ return {
     },
   },
   config = function()
+    local opencode_cmd = "opencode --port"
+    ---@type snacks.terminal.Opts
+    local term_opts = {
+      win = {
+        position = "right",
+        enter = false,
+      },
+    }
+
+    local function toggle_opencode()
+      require("snacks").terminal.toggle(opencode_cmd, term_opts)
+    end
+
     local function map_opencode_terminal(buf)
       local opts = { buffer = buf, silent = true }
 
-      vim.keymap.set("t", "<C-w>p", function() require("opencode").toggle() end, vim.tbl_extend("force", opts, { desc = "Toggle opencode" }))
+      vim.keymap.set({ "t", "n" }, "<C-w>q", toggle_opencode, vim.tbl_extend("force", opts, { desc = "Close opencode window" }))
       vim.keymap.set("t", "<C-w>h", [[<C-\><C-n><C-w>h]], vim.tbl_extend("force", opts, { desc = "Move to left window" }))
       vim.keymap.set("t", "<C-w>j", [[<C-\><C-n><C-w>j]], vim.tbl_extend("force", opts, { desc = "Move to lower window" }))
       vim.keymap.set("t", "<C-w>k", [[<C-\><C-n><C-w>k]], vim.tbl_extend("force", opts, { desc = "Move to upper window" }))
@@ -45,7 +57,7 @@ return {
     -- Use terminal-safe mappings so they survive tmux and terminal key handling.
     vim.keymap.set({ "n", "x" }, "<leader>oa", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
     vim.keymap.set({ "n", "x" }, "<leader>ox", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-    vim.keymap.set("n", "<leader>oo", function() require("opencode").toggle() end,                                     { desc = "Toggle opencode" })
+    vim.keymap.set("n", "<leader>oo", toggle_opencode,                                                        { desc = "Toggle opencode" })
 
     vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
     vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
@@ -55,9 +67,11 @@ return {
 
     vim.api.nvim_create_autocmd("TermOpen", {
       callback = function(event)
-        local name = vim.api.nvim_buf_get_name(event.buf)
-        if name:match("opencode %-%-port") then
-          map_opencode_terminal(event.buf)
+        local buf = event.buf
+        local name = vim.api.nvim_buf_get_name(buf)
+        local term = vim.b[buf].snacks_terminal
+        if name:match("opencode %-%-port") or (term and term.cmd == opencode_cmd) then
+          map_opencode_terminal(buf)
         end
       end,
     })
